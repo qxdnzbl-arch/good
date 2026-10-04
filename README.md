@@ -62,7 +62,27 @@ PORT=8443 SNI=www.apple.com NAME=tokyo bash install.sh
 
 导入后选中节点，开启 **系统代理** 或 **TUN 模式**；路由建议选“绕过大陆”，国内网站直连更快。
 
-## 4. 常见问题
+## 4. 打包你自己的安卓 App（可选）
+
+仓库里自带 GitHub Actions 打包流程（`.github/workflows/build-apk.yml`），基于开源的 v2rayNG，改成**你自己的名字、包名和图标颜色**，还能把你的节点内置进去：装好打开就有节点，点一下就能连。
+
+1. **内置节点（推荐）**：仓库 → Settings → Secrets and variables → Actions → New repository secret
+   名称填 `PRESET_NODE`，值填 `install.sh` 输出的 `vless://...` 链接。
+   不要把链接写进代码：这个仓库是公开的。
+2. **打包**：仓库 → Actions → Build APK → Run workflow，可以填 App 名称、包名后缀、图标颜色，大约 15～25 分钟完成。
+3. **下载**：打开那次运行记录，页面底部 Artifacts 里下载 `vpn-arm64-v8a`（大多数手机用这个）或 `vpn-universal`（通用版），解压后把 apk 装到手机上。
+
+固定签名（可选，以后升级 App 时不用先卸载旧版）：在自己电脑上生成证书并添加两个 Secret：
+
+```bash
+keytool -genkeypair -keystore release.jks -alias release -keyalg RSA -keysize 2048 -validity 36500 -dname "CN=VPN"
+base64 -w0 release.jks   # 输出内容填到 Secret: KEYSTORE_BASE64
+# 证书密码填到 Secret: KEYSTORE_PASSWORD
+```
+
+> 节点信息会打包进 APK，别把 APK 发给不信任的人。v2rayNG 使用 GPL-3.0 协议，这个定制版同样遵守该协议。
+
+## 5. 常见问题
 
 **连不上？** 按这个顺序排查：
 1. 云控制台安全组是否放行了 TCP 443
