@@ -1,0 +1,134 @@
+name: Build APK
+
+# 在 GitHub 上免费打包你自己的安卓 VPN App (基于开源的 v2rayNG)。
+# 运行: 仓库 → Actions → Build APK → Run workflow
+# 可选 Secrets (Settings → Secrets and variables → Actions):
+#   PRESET_NODE        install.sh 输出的 vless:// 链接, App 首次打开自动导入
+#   KEYSTORE_BASE64    签名证书 (base64); 不设置则每次随机生成, 升级时需要先卸载旧版
+#   KEYSTORE_PASSWORD  签名证书密码
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: App 名称
+        default: Good VPN
+      app_id:
+        description: 包名后缀 (小写字母数字)
+        default: mine
+      icon_color:
+        description: 图标背景色
+        default: '#1E88E5'
+  push:
+    paths:
+      - android/**
+      - .github/workflows/build-apk.yml
+
+env:
+  V2RAYNG_TAG: '2.3.10'
+  NDK_VERSION: '30.0.16248370'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout v2rayNG ${{ env.V2RAYNG_TAG }}
+        uses: actions/checkout@v4
+        with:
+          repository: 2dust/v2rayNG
+          ref: ${{ env.V2RAYNG_TAG }}
+          path: v2rayng
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Customize
+        env:
+          APP_NAME: ${{ inputs.app_name || 'Good VPN' }}
+          APP_ID: ${{ inputs.app_id || 'mine' }}
+          ICON_COLOR: ${{ inputs.icon_color || '#1E88E5' }}
+        run: bash android/patch.sh v2rayng
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
+          cmdline-tools-version: '14742923'
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools ndk;${{ env.NDK_VERSION }}'
+
+      - name: Build libhevtun
+        working-directory: v2rayng
+        run: |
+          export NDK_HOME="$ANDROID_HOME/ndk/$NDK_VERSION"
+          sed -i "/^    compileSdk = /a\\    ndkVersion = \"$NDK_VERSION\"" V2rayNG/app/build.gradle.kts
+          bash compile-hevtun.sh
+          cp -r libs V2rayNG/app
+
+      - name: Download libv2ray
+        working-directory: v2rayng
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(git -C AndroidLibXrayLite describe --tags --abbrev=0)
+          echo "AndroidLibXrayLite $tag"
+          mkdir -p V2rayNG/app/libs
+          gh release download "$tag" -R 2dust/AndroidLibXrayLite -p libv2ray.aar -D V2rayNG/app/libs
+
+      - name: Prepare keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          ks="$RUNNER_TEMP/release.jks"
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$ks"
+            pass="$KEYSTORE_PASSWORD"
+            alias=$(keytool -list -keystore "$ks" -storepass "$pass" | awk -F, '/PrivateKeyEntry/ {print $1; exit}')
+          else
+            echo "::warning::没有设置 KEYSTORE_BASE64, 本次使用随机签名; 升级时需要先卸载旧版"
+            pass=$(openssl rand -hex 16)
+            alias=release
+            keytool -genkeypair -keystore "$ks" -storepass "$pass" -keypass "$pass" \
+              -alias "$alias" -keyalg RSA -keysize 2048 -validity 36500 -dname "CN=VPN"
+          fi
+          echo "::add-mask::$pass"
+          {
+            echo "KS_FILE=$ks"
+            echo "KS_PASS=$pass"
+            echo "KS_ALIAS=$alias"
+          } >> "$GITHUB_ENV"
+
+      - name: Build APK
+        working-directory: v2rayng/V2rayNG
+        env:
+          PRESET_NODE: ${{ secrets.PRESET_NODE }}
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          chmod +x gradlew
+          ./gradlew licensePlaystoreReleaseReport assemblePlaystoreRelease \
+            -Pandroid.injected.signing.store.file="$KS_FILE" \
+            -Pandroid.injected.signing.store.password="$KS_PASS" \
+            -Pandroid.injected.signing.key.alias="$KS_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KS_PASS"
+          if [ -n "$PRESET_NODE" ]; then echo "已内置节点"; else echo "::notice::没有设置 PRESET_NODE, 需要在 App 里扫码导入节点"; fi
+
+      - name: Upload arm64-v8a APK (大多数手机用这个)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vpn-arm64-v8a
+          path: v2rayng/V2rayNG/app/build/outputs/apk/playstore/release/*arm64-v8a*.apk
+          if-no-files-found: error
+
+      - name: Upload universal APK (通用版)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vpn-universal
+          path: v2rayng/V2rayNG/app/build/outputs/apk/playstore/release/*universal*.apk
+          if-no-files-found: error
