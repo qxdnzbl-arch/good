@@ -69,7 +69,7 @@ PORT=8443 SNI=www.apple.com NAME=tokyo bash install.sh
 1. **内置节点（推荐）**：仓库 → Settings → Secrets and variables → Actions → New repository secret
    名称填 `PRESET_NODE`，值填 `install.sh` 输出的 `vless://...` 链接。
    不要把链接写进代码：这个仓库是公开的。
-2. **打包**：仓库 → Actions → Build APK → Run workflow，可以填 App 名称、包名后缀、图标颜色，大约 15～25 分钟完成。
+2. **打包**：仓库 → Actions → Build APK → Run workflow，可以填 App 名称、包名后缀、图标颜色，大约 5～10 分钟完成。
 3. **下载**：打开那次运行记录，页面底部 Artifacts 里下载 `vpn-arm64-v8a`（大多数手机用这个）或 `vpn-universal`（通用版），解压后把 apk 装到手机上。
 
 固定签名（可选，以后升级 App 时不用先卸载旧版）：在自己电脑上生成证书并添加两个 Secret：
