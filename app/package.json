@@ -1,0 +1,14 @@
+{
+  "name": "muma-xiaowu",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "木马小屋：自托管的 Claude 陪伴聊天应用",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.0",
+    "three": "0.128.0"
+  }
+}

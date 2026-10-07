@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff6f8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>木马小屋</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23ef8fab' d='M16 28S3 20 3 11.5C3 7 6.5 4 10 4c2.6 0 4.6 1.4 6 3.4C17.4 5.4 19.4 4 22 4c3.5 0 7 3 7 7.5C29 20 16 28 16 28Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Fredoka:wght@400;500;600&family=Dancing+Script:wght@600&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main id="view"></main>
+
+<div class="mini" id="mini" hidden>
+  <div class="disc" aria-hidden="true"></div>
+  <div class="meta" id="miniMeta"><b id="miniTitle"></b><span>一起听中</span></div>
+  <button class="round" id="miniToggle" type="button" aria-label="暂停"></button>
+</div>
+
+<nav class="tabs" id="tabs" hidden>
+  <a href="#/" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z"/></svg>小屋</a>
+  <a href="#/chat" data-tab="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V17h0A2.5 2.5 0 0 1 4 14.5z"/></svg>聊天</a>
+  <a href="#/listen" data-tab="listen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>一起听</a>
+  <a href="#/memory" data-tab="memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 4h11a1 1 0 0 1 1 1v15H7a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1Z"/><path d="M5 17a2 2 0 0 1 2-2h11"/><path d="M11.5 11.2s-2.5-1.5-2.5-3.1C9 7 10.6 6.5 11.5 7.6c.9-1.1 2.5-.6 2.5.5 0 1.6-2.5 3.1-2.5 3.1Z"/></svg>记忆</a>
+  <a href="#/wish" data-tab="wish"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 4h8M9 4v3l-2.5 3.5A5 5 0 0 0 6 13v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-5a5 5 0 0 0-.5-2.5L15 7V4"/><path d="m12 12.5.8 1.6 1.7.2-1.3 1.2.4 1.7-1.6-.9-1.6.9.4-1.7-1.3-1.2 1.7-.2z"/></svg>许愿</a>
+</nav>
+
+<script src="/vendor/three.min.js"></script>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
