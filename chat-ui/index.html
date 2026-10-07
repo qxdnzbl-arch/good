@@ -1,203 +1,254 @@
 <title>青灯对话</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: left rail of conversations + one reading column; rail becomes a drawer under 760px */
+/* Layout: a night scene (canvas of drifting lamplight) under a frosted conversation rail + one reading column.
+   Deliberately a single dark look: a lamp only glows in the dark. */
 :root {
-  --bg: #e9eeec;          /* 月白 ground */
-  --surface: #f7f9f8;
-  --rail: #dfe6e3;
-  --ink: #1b282b;
-  --muted: #5d6d6f;
-  --line: #cfd9d6;
-  --accent: #2c6b5e;      /* 竹青 */
-  --accent-ink: #f4faf8;
-  --user-bubble: #d5e6e0;
-  --code-bg: #e2e9e6;
-  --danger: #a23b2a;
+  --night: #070c13;
+  --deep: #0c1a1d;
+  --glass: rgba(16, 27, 31, .46);
+  --glass-strong: rgba(12, 21, 25, .72);
+  --line: rgba(255, 232, 196, .10);
+  --ink: #efe7d8;
+  --muted: #8f9c98;
+  --lamp: #f2b866;
+  --lamp-hi: #ffe1ae;
+  --lamp-soft: rgba(242, 184, 102, .16);
+  --jade: #7fc6b4;
+  --danger: #f09c88;
   --f-display: "Noto Serif SC", "Songti SC", "STSong", serif;
   --f-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --r: 14px;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #111a1c; --surface: #172224; --rail: #0d1517; --ink: #e1e9e7; --muted: #8fa19f;
-    --line: #26353a; --accent: #7cc2b0; --accent-ink: #0d1d19; --user-bubble: #1f3a35;
-    --code-bg: #0e1719; --danger: #e48a78; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #111a1c; --surface: #172224; --rail: #0d1517; --ink: #e1e9e7; --muted: #8fa19f;
-  --line: #26353a; --accent: #7cc2b0; --accent-ink: #0d1d19; --user-bubble: #1f3a35;
-  --code-bg: #0e1719; --danger: #e48a78; color-scheme: dark;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
 }
 
 html, body { height: 100%; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; }
+body {
+  color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.75;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 108%, rgba(242,184,102,.20), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 0%, rgba(127,198,180,.10), transparent 70%),
+    linear-gradient(180deg, var(--night) 0%, var(--deep) 100%);
+  background-color: var(--night);
+  overflow: hidden;
+}
 * { box-sizing: border-box; }
 button { font: inherit; color: inherit; cursor: pointer; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus-visible { outline: 1.5px solid var(--lamp); outline-offset: 3px; }
+::selection { background: rgba(242,184,102,.35); }
+* { scrollbar-width: thin; scrollbar-color: rgba(255,232,196,.14) transparent; }
 
-.app { height: 100%; display: grid; grid-template-columns: 268px 1fr; }
+#sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+.app { position: relative; z-index: 2; height: 100%; display: grid; grid-template-columns: 272px 1fr; }
 
 /* ---------- rail ---------- */
-.rail { background: var(--rail); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; padding: 18px 14px; gap: 16px; }
-.brand { display: flex; align-items: center; gap: 10px; padding-inline: 6px; }
-.seal { width: 34px; height: 34px; flex: none; border-radius: 7px; background: var(--accent); color: var(--accent-ink);
-  display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 18px; line-height: 1; }
-.brand h1 { margin: 0; font-family: var(--f-display); font-size: 20px; font-weight: 700; letter-spacing: .08em; }
-.new-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 10px;
-  border: 1px dashed var(--muted); background: transparent; font-size: 14px; transition: background .15s, border-color .15s; }
-.new-btn:hover { background: var(--surface); border-color: var(--accent); border-style: solid; }
-.rail-label { font-size: 11px; letter-spacing: .14em; color: var(--muted); padding-inline: 8px; text-transform: uppercase; }
+.rail { margin: 14px 0 14px 14px; border-radius: 22px; background: var(--glass); border: 1px solid var(--line);
+  backdrop-filter: blur(22px) saturate(130%); -webkit-backdrop-filter: blur(22px) saturate(130%);
+  display: flex; flex-direction: column; min-height: 0; padding: 22px 14px 16px; gap: 18px; }
+.brand { display: flex; align-items: center; gap: 12px; padding-inline: 8px; }
+.brand h1 { margin: 0; font-family: var(--f-display); font-size: 22px; font-weight: 700; letter-spacing: .3em; line-height: 1.2;
+  text-shadow: 0 0 18px rgba(242,184,102,.35); }
+.brand small { display: block; font-size: 11px; letter-spacing: .32em; color: var(--muted); margin-top: 2px; }
+.new-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; border-radius: 14px;
+  border: 1px solid rgba(242,184,102,.28); background: linear-gradient(180deg, rgba(242,184,102,.12), rgba(242,184,102,.04));
+  font-size: 14px; letter-spacing: .1em; color: var(--lamp-hi); transition: box-shadow .25s, border-color .25s; }
+.new-btn:hover { border-color: rgba(242,184,102,.55); box-shadow: 0 0 24px rgba(242,184,102,.18); }
+.rail-label { font-size: 11px; letter-spacing: .3em; color: var(--muted); padding-inline: 10px; }
 .convs { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; }
-.conv { display: flex; align-items: center; gap: 6px; border-radius: 9px; }
-.conv button.open { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 9px 10px; border-radius: 9px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; color: var(--muted); }
-.conv.active button.open { color: var(--ink); background: var(--surface); font-weight: 500; }
-.conv button.open:hover { color: var(--ink); }
-.conv button.del { background: none; border: 0; color: var(--muted); padding: 4px 8px; opacity: 0; font-size: 16px; line-height: 1; }
+.conv { display: flex; align-items: center; border-radius: 12px; position: relative; }
+.conv button.open { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 9px 12px; border-radius: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; color: var(--muted); transition: color .2s, background .2s; }
+.conv button.open:hover { color: var(--ink); background: rgba(255,232,196,.04); }
+.conv.active button.open { color: var(--ink); background: rgba(255,232,196,.07); }
+.conv.active::before { content: ""; position: absolute; left: 3px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%;
+  background: var(--lamp); box-shadow: 0 0 8px var(--lamp); }
+.conv button.del { background: none; border: 0; color: var(--muted); padding: 4px 10px; opacity: 0; font-size: 16px; line-height: 1; transition: opacity .2s; }
 .conv:hover button.del, .conv button.del:focus-visible { opacity: 1; }
 .conv button.del:hover { color: var(--danger); }
-.rail-foot { font-size: 12px; color: var(--muted); padding-inline: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.theme-btn { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12px; }
+.rail-foot { font-size: 12px; color: var(--muted); padding-inline: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ghost { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 12px; color: var(--muted); transition: color .2s, border-color .2s; }
+.ghost:hover { color: var(--ink); border-color: rgba(255,232,196,.25); }
+
+/* ---------- lamp (assistant mark) ---------- */
+.lamp { flex: none; width: 30px; height: 30px; border-radius: 50%; position: relative;
+  background: radial-gradient(circle at 42% 38%, var(--lamp-hi) 0%, var(--lamp) 38%, rgba(242,184,102,.25) 62%, transparent 72%);
+  box-shadow: 0 0 22px rgba(242,184,102,.45); }
+.lamp.big { width: 64px; height: 64px; box-shadow: 0 0 60px rgba(242,184,102,.5), 0 0 140px rgba(242,184,102,.18); animation: breathe 5s ease-in-out infinite; }
+.lamp.busy { animation: breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.08); filter: brightness(1.25); } }
 
 /* ---------- main ---------- */
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.topbar { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--line); }
-.menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; }
-.topbar h2 { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 17px; min-width: 0;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-wrap: balance; }
-.status { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
-.status.live .dot { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.topbar { display: flex; align-items: center; gap: 14px; padding: 22px 32px 10px; }
+.menu-btn { display: none; background: var(--glass); border: 1px solid var(--line); border-radius: 10px; padding: 4px 11px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.topbar h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: .08em; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(239,231,216,.86); }
+.status { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; white-space: nowrap; letter-spacing: .06em; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.status.live .dot { background: var(--jade); box-shadow: 0 0 10px var(--jade); }
 
-.scroll { flex: 1; overflow-y: auto; min-height: 0; }
-.thread { max-width: 760px; margin: 0 auto; padding: 28px 24px 12px; display: flex; flex-direction: column; gap: 26px; }
+.scroll { flex: 1; overflow-y: auto; min-height: 0;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%); }
+.thread { max-width: 740px; margin: 0 auto; padding: 30px 28px 20px; display: flex; flex-direction: column; gap: 30px; min-height: 100%; }
 
-.empty { text-align: center; padding-block: 8vh 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.empty .seal { width: 56px; height: 56px; font-size: 30px; border-radius: 12px; }
-.empty h3 { margin: 0; font-family: var(--f-display); font-size: 26px; font-weight: 700; text-wrap: balance; }
-.empty p { margin: 0; color: var(--muted); }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 560px; }
-.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; font-size: 13.5px; transition: border-color .15s; }
-.chip:hover { border-color: var(--accent); }
+.empty { margin: auto 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 18px; padding-block: 24px; }
+.empty .when { font-size: 12px; letter-spacing: .4em; color: var(--lamp); opacity: .85; font-variant-numeric: tabular-nums; margin-top: 10px; }
+.empty h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: clamp(28px, 5vw, 42px); letter-spacing: .12em; line-height: 1.35;
+  text-wrap: balance; text-shadow: 0 0 30px rgba(242,184,102,.22); }
+.empty p { margin: 0; color: var(--muted); letter-spacing: .08em; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 580px; margin-top: 8px; }
+.chip { border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-radius: 999px; padding: 8px 16px; font-size: 13.5px; color: rgba(239,231,216,.85); transition: border-color .25s, box-shadow .25s, transform .25s; }
+.chip:hover { border-color: rgba(242,184,102,.4); box-shadow: 0 0 22px rgba(242,184,102,.14); transform: translateY(-1px); }
 
-.msg { display: flex; gap: 14px; min-width: 0; animation: rise .28s ease-out; }
-@keyframes rise { from { transform: translateY(6px); opacity: .4; } to { transform: none; opacity: 1; } }
-.msg .seal { width: 30px; height: 30px; font-size: 15px; border-radius: 7px; margin-top: 2px; }
+.msg { display: flex; gap: 16px; min-width: 0; animation: rise .5s cubic-bezier(.2,.7,.2,1); }
+@keyframes rise { from { transform: translateY(10px); opacity: .2; filter: blur(3px); } to { transform: none; opacity: 1; filter: none; } }
+.msg .lamp { margin-top: 4px; }
 .msg.user { justify-content: flex-end; }
-.msg.user .body { background: var(--user-bubble); padding: 10px 16px; border-radius: var(--r) var(--r) 4px var(--r); max-width: 82%; white-space: pre-wrap; }
-.msg.bot .body { flex: 1; min-width: 0; }
+.msg.user .body { max-width: 80%; white-space: pre-wrap; padding: 11px 18px; border-radius: 20px 20px 6px 20px;
+  background: linear-gradient(140deg, rgba(242,184,102,.24), rgba(242,184,102,.09));
+  border: 1px solid rgba(242,184,102,.24); box-shadow: 0 8px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,225,174,.12);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.msg.bot .col { flex: 1; min-width: 0; }
+.msg.bot .body { font-family: var(--f-display); font-size: 16px; line-height: 1.95; letter-spacing: .02em; color: var(--ink); }
 .body > :first-child { margin-top: 0; }
 .body > :last-child { margin-bottom: 0; }
-.body p { margin: 0 0 .8em; }
-.body h1, .body h2, .body h3 { font-family: var(--f-display); line-height: 1.35; margin: 1.1em 0 .5em; font-size: 1.12em; }
-.body ul, .body ol { padding-left: 1.4em; margin: 0 0 .8em; }
-.body a { color: var(--accent); }
-.body code { font-family: var(--f-mono); font-size: .88em; background: var(--code-bg); padding: 1px 5px; border-radius: 5px; }
-.body pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; margin: 0 0 .9em; }
-.body pre code { background: none; padding: 0; font-size: 13px; line-height: 1.6; }
-.body blockquote { margin: 0 0 .8em; padding-left: 12px; border-left: 3px solid var(--line); color: var(--muted); }
-.meta { margin-top: 8px; display: flex; gap: 12px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.meta button { background: none; border: 0; padding: 0; color: var(--muted); font-size: 12px; }
-.meta button:hover { color: var(--accent); }
-.thinking { color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
-.thinking i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.2s infinite; }
-.thinking i:nth-child(2) { animation-delay: .2s; } .thinking i:nth-child(3) { animation-delay: .4s; }
-@keyframes blink { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
-.err { color: var(--danger); font-size: 13px; margin-top: 6px; }
-.note { font-size: 12.5px; color: var(--muted); text-align: center; }
+.body p { margin: 0 0 .9em; }
+.body strong { color: var(--lamp-hi); font-weight: 600; }
+.body h1, .body h2, .body h3 { font-family: var(--f-display); line-height: 1.4; margin: 1.2em 0 .5em; font-size: 1.1em; letter-spacing: .06em; color: var(--lamp-hi); }
+.body ul, .body ol { padding-left: 1.4em; margin: 0 0 .9em; }
+.body li::marker { color: var(--lamp); }
+.body a { color: var(--lamp); text-underline-offset: 3px; }
+.body code { font-family: var(--f-mono); font-size: .82em; background: rgba(255,232,196,.08); padding: 1px 6px; border-radius: 6px; }
+.body pre { font-family: var(--f-mono); background: rgba(5,10,14,.62); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+  overflow-x: auto; margin: 0 0 1em; letter-spacing: 0; }
+.body pre code { background: none; padding: 0; font-size: 13px; line-height: 1.65; color: #d9e6e2; }
+.body blockquote { margin: 0 0 .9em; padding: 4px 0 4px 16px; border-left: 2px solid rgba(242,184,102,.45); color: var(--muted); font-style: italic; }
+.meta { margin-top: 10px; display: flex; gap: 16px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; opacity: .7; transition: opacity .25s; }
+.msg:hover .meta { opacity: 1; }
+.meta button { background: none; border: 0; padding: 0; color: var(--muted); font-size: 12px; letter-spacing: .06em; }
+.meta button:hover { color: var(--lamp); }
+.thinking { color: var(--muted); font-family: var(--f-body); font-size: 13px; letter-spacing: .2em; animation: fade 1.8s ease-in-out infinite; }
+@keyframes fade { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+.err { color: var(--danger); font-size: 13px; margin-top: 8px; font-family: var(--f-body); }
+.note { font-size: 12px; color: var(--muted); text-align: center; letter-spacing: .1em; opacity: .75; }
 
 /* ---------- composer ---------- */
-.composer-wrap { padding: 8px 24px calc(18px + env(safe-area-inset-bottom, 0px)); }
-.composer { max-width: 760px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
-  padding: 10px 10px 10px 16px; display: flex; align-items: flex-end; gap: 10px; transition: border-color .15s, box-shadow .15s; }
-.composer:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
+.composer-wrap { padding: 6px 28px calc(20px + env(safe-area-inset-bottom, 0px)); }
+.composer { max-width: 740px; margin: 0 auto; background: var(--glass-strong); border: 1px solid var(--line); border-radius: 26px;
+  backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%);
+  padding: 10px 10px 10px 22px; display: flex; align-items: flex-end; gap: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35); transition: border-color .3s, box-shadow .3s; }
+.composer:focus-within { border-color: rgba(242,184,102,.38); box-shadow: 0 20px 60px rgba(0,0,0,.35), 0 0 50px rgba(242,184,102,.14); }
 .composer textarea { flex: 1; min-width: 0; border: 0; outline: 0; resize: none; background: transparent; color: var(--ink);
-  font: inherit; line-height: 1.6; max-height: 200px; padding: 6px 0; }
-.composer textarea::placeholder { color: var(--muted); }
-.send { flex: none; width: 40px; height: 40px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink);
-  display: grid; place-items: center; transition: transform .1s, opacity .15s; }
-.send:disabled { opacity: .35; cursor: default; }
-.send:not(:disabled):active { transform: scale(.94); }
+  font: inherit; font-size: 15.5px; line-height: 1.6; max-height: 200px; padding: 8px 0; }
+.composer textarea::placeholder { color: rgba(143,156,152,.8); letter-spacing: .06em; }
+.send { flex: none; width: 42px; height: 42px; border-radius: 50%; border: 0; color: #2a1a06;
+  background: radial-gradient(circle at 40% 35%, var(--lamp-hi), var(--lamp) 70%);
+  box-shadow: 0 0 22px rgba(242,184,102,.45); display: grid; place-items: center; transition: transform .15s, opacity .25s, box-shadow .25s; }
+.send:hover:not(:disabled) { box-shadow: 0 0 34px rgba(242,184,102,.7); }
+.send:disabled { opacity: .28; box-shadow: none; cursor: default; }
+.send:not(:disabled):active { transform: scale(.92); }
 .send svg { width: 18px; height: 18px; }
-.hint { max-width: 760px; margin: 6px auto 0; font-size: 11.5px; color: var(--muted); text-align: center; }
+.hint { max-width: 740px; margin: 8px auto 0; font-size: 11.5px; color: var(--muted); text-align: center; letter-spacing: .08em; opacity: .7; }
 
 .scrim { display: none; }
 
 @media (max-width: 760px) {
   .app { grid-template-columns: 1fr; }
-  .rail { position: fixed; inset: 0 auto 0 0; width: min(82vw, 300px); z-index: 20; transform: translateX(-100%); transition: transform .22s ease;
-    padding-top: calc(18px + env(safe-area-inset-top, 0px)); }
+  .rail { position: fixed; inset: 0 auto 0 0; margin: 0; border-radius: 0 22px 22px 0; width: min(82vw, 300px); z-index: 20;
+    background: var(--glass-strong); transform: translateX(-105%); transition: transform .3s cubic-bezier(.2,.7,.2,1);
+    padding-top: calc(22px + env(safe-area-inset-top, 0px)); }
   .app.drawer .rail { transform: none; }
-  .app.drawer .scrim { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 10; }
+  .app.drawer .scrim { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .45); z-index: 10; }
   .menu-btn { display: inline-block; }
-  .topbar { padding: 12px 16px; }
-  .thread { padding: 20px 16px 8px; }
+  .topbar { padding: 14px 16px 6px; }
+  .thread { padding: 20px 16px 12px; gap: 24px; }
   .composer-wrap { padding-inline: 16px; }
-  .msg.user .body { max-width: 90%; }
-  .msg .seal { display: none; }
+  .msg.user .body { max-width: 88%; }
+  .msg.bot { flex-direction: column; gap: 8px; }
+  .msg .lamp { width: 20px; height: 20px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
 <div class="app" id="app">
   <aside class="rail" aria-label="对话列表">
-    <div class="brand"><div class="seal" aria-hidden="true">言</div><h1>青灯</h1></div>
-    <button class="new-btn" id="newBtn" type="button">＋ 新对话</button>
-    <div class="rail-label">最近</div>
+    <div class="brand"><div class="lamp" aria-hidden="true"></div><h1>青灯<small>夜 读 · 对 话</small></h1></div>
+    <button class="new-btn" id="newBtn" type="button">新的对话</button>
+    <div class="rail-label">往 昔</div>
     <ul class="convs" id="convs"></ul>
-    <div class="rail-foot"><span id="countLabel"></span><button class="theme-btn" id="themeBtn" type="button">切换主题</button></div>
+    <div class="rail-foot"><span id="clock"></span><button class="ghost" id="fxBtn" type="button">光影 开</button></div>
   </aside>
   <div class="scrim" id="scrim"></div>
 
   <main class="main">
     <header class="topbar">
       <button class="menu-btn" id="menuBtn" type="button" aria-label="打开对话列表">☰</button>
-      <h2 id="title">新对话</h2>
-      <div class="status" id="status"><span class="dot"></span><span id="statusText">连接中…</span></div>
+      <h2 id="title">新的对话</h2>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">点灯中…</span></div>
     </header>
     <div class="scroll" id="scroll"><div class="thread" id="thread"></div></div>
     <form class="composer-wrap" id="form">
       <div class="composer">
-        <textarea id="input" rows="1" placeholder="说点什么… （Enter 发送，Shift+Enter 换行）" aria-label="消息"></textarea>
-        <button class="send" id="send" type="submit" aria-label="发送" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-        </button>
+        <textarea id="input" rows="1" placeholder="写下你想说的话……" aria-label="消息"></textarea>
+        <button class="send" id="send" type="submit" aria-label="发送" disabled></button>
       </div>
-      <p class="hint" id="hint">对话记录只保存在你自己的浏览器里。</p>
+      <p class="hint" id="hint">Enter 发送 · Shift + Enter 换行 · 记录只留在你的浏览器里</p>
     </form>
   </main>
 </div>
 
 <script>
 (() => {
-  const RULES = "你是一个友好、可靠的中文助手。回答简洁清楚，需要时使用 Markdown（列表、代码块）。不确定的事实要说明不确定，不要编造。";
+  const RULES = "你是一个温和、可靠的中文助手。回答简洁清楚，需要时使用 Markdown（列表、代码块）。不确定的事实要说明不确定，不要编造。";
   const STORE = "qingdeng.chats.v1";
   const $ = (id) => document.getElementById(id);
   const els = { app: $("app"), convs: $("convs"), thread: $("thread"), scroll: $("scroll"), input: $("input"), send: $("send"),
-    form: $("form"), title: $("title"), status: $("status"), statusText: $("statusText"), count: $("countLabel") };
+    form: $("form"), title: $("title"), status: $("status"), statusText: $("statusText") };
+
+  // ---------- 时辰 ----------
+  const SHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+  const shichen = (d = new Date()) => SHI[Math.floor(((d.getHours() + 1) % 24) / 2)] + "时";
+  function greeting(d = new Date()) {
+    const h = d.getHours();
+    if (h < 5) return "夜很深了，还醒着吗";
+    if (h < 9) return "早，今天想做点什么";
+    if (h < 13) return "日光正好，聊点什么";
+    if (h < 17) return "午后，慢慢来";
+    if (h < 21) return "天黑了，灯亮着";
+    return "夜深了，想聊点什么";
+  }
+  const hhmm = (t) => new Date(t).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false });
+  function tickClock() { $("clock").textContent = "此刻 · " + shichen() + " " + hhmm(Date.now()); }
 
   // ---------- state ----------
   const uid = () => Math.random().toString(36).slice(2, 10);
+  const blank = () => ({ id: uid(), title: "新的对话", updated: Date.now(), messages: [] });
   const example = () => ({
-    id: uid(), title: "示例：周末去哪儿走走", example: true, updated: Date.now(),
+    id: uid(), title: "示例 · 睡不着的夜晚", example: true, updated: Date.now() - 1000,
     messages: [
-      { role: "user", content: "周末想在城市附近轻松走走，有什么安排思路？", t: Date.now() - 120000 },
+      { role: "user", content: "睡不着，能陪我聊会儿吗？", t: Date.now() - 120000 },
       { role: "assistant", t: Date.now() - 110000, content:
-        "可以按**体力**和**时间**来挑：\n\n1. **半天城市散步**：选一条有咖啡馆和公园的街区，走 5–8 公里。\n2. **近郊徒步**：找评价里标注“新手友好”的步道，提前看天气。\n3. **骑行**：沿河或绿道，租车方便的路线最省心。\n\n> 这是一段示例对话。点左上角“新对话”就可以开始真正聊天。" }
+        "当然可以。夜里醒着的时候，心事总会比白天响一些。\n\n如果想放松，可以试试这样：\n\n1. **把手机亮度调到最低**，让眼睛先歇一歇。\n2. **慢慢呼吸**：吸气四拍，停留四拍，呼气六拍。\n3. **说说今天**：哪怕是一件很小的事。\n\n> 这是一段示例对话。点“新的对话”，就可以开始真正聊天。" }
     ]
   });
   let chats = load();
-  let currentId = chats[0]?.id ?? null;
+  let currentId = [...chats].sort((a, b) => b.updated - a.updated)[0].id;
   let sample = null, busy = false, ctl = null;
 
   function load() {
     try { const v = JSON.parse(localStorage.getItem(STORE) || "null"); if (Array.isArray(v) && v.length) return v; } catch {}
-    return [example()];
+    return [example(), blank()];
   }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(chats)); } catch {} }
   const current = () => chats.find(c => c.id === currentId);
@@ -237,7 +288,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
   }
 
   // ---------- render ----------
-  const fmtTime = (t) => new Date(t).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
   function renderList() {
     els.convs.textContent = "";
     [...chats].sort((a, b) => b.updated - a.updated).forEach(c => {
@@ -249,20 +299,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
       del.onclick = () => removeChat(c.id);
       li.append(open, del); els.convs.append(li);
     });
-    els.count.textContent = chats.length + " 段对话";
   }
   function bubble(m, i) {
     const row = document.createElement("div"); row.className = "msg " + (m.role === "user" ? "user" : "bot");
     const body = document.createElement("div"); body.className = "body";
     if (m.role === "user") { body.textContent = m.content; row.append(body); return row; }
-    const seal = document.createElement("div"); seal.className = "seal"; seal.textContent = "言"; seal.setAttribute("aria-hidden", "true");
-    const col = document.createElement("div"); col.style.minWidth = "0"; col.style.flex = "1";
-    body.innerHTML = m.content ? md(m.content) : '<span class="thinking" aria-label="思考中"><i></i><i></i><i></i></span>';
+    const lamp = document.createElement("div"); lamp.className = "lamp" + (m.pending ? " busy" : ""); lamp.setAttribute("aria-hidden", "true");
+    const col = document.createElement("div"); col.className = "col";
+    body.innerHTML = m.content ? md(m.content) : '<span class="thinking">灯下思索中</span>';
     col.append(body);
     if (m.error) { const e = document.createElement("div"); e.className = "err"; e.textContent = m.error; col.append(e); }
     if (m.content && !m.pending) {
       const meta = document.createElement("div"); meta.className = "meta";
-      const time = document.createElement("span"); time.textContent = fmtTime(m.t);
+      const time = document.createElement("span"); time.textContent = hhmm(m.t);
       const copy = document.createElement("button"); copy.type = "button"; copy.textContent = "复制";
       copy.onclick = async () => {
         try { await navigator.clipboard.writeText(m.content); copy.textContent = "已复制"; }
@@ -276,15 +325,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
       }
       col.append(meta);
     }
-    row.append(seal, col); return row;
+    row.append(lamp, col); return row;
   }
   function renderThread() {
     const c = current(); els.thread.textContent = "";
-    els.title.textContent = c ? c.title : "新对话";
+    els.title.textContent = c ? c.title : "新的对话";
     if (!c || !c.messages.length) {
       const e = document.createElement("div"); e.className = "empty";
-      e.innerHTML = '<div class="seal" aria-hidden="true">言</div><h3>今天想聊点什么？</h3><p>问问题、改文案、写代码，都可以。</p><div class="chips"></div>';
-      ["帮我把这段话改得更通顺", "用三句话解释什么是 VPN", "写一个 Python 读取 CSV 的例子", "给我一个周末学习计划"].forEach(t => {
+      e.innerHTML = '<div class="lamp big" aria-hidden="true"></div><div class="when"></div><h3></h3><p>问一个问题，改一段文字，或者只是说说话。</p><div class="chips"></div>';
+      e.querySelector(".when").textContent = shichen() + " · " + hhmm(Date.now());
+      e.querySelector("h3").textContent = greeting();
+      ["帮我把这段话改得更温柔", "推荐几本适合夜读的书", "用三句话解释什么是 VPN", "陪我想想明天的计划"].forEach(t => {
         const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = t;
         b.onclick = () => { els.input.value = t; syncInput(); els.input.focus(); };
         e.querySelector(".chips").append(b);
@@ -292,20 +343,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
       els.thread.append(e); return;
     }
     c.messages.forEach((m, i) => els.thread.append(bubble(m, i)));
-    if (c.example) { const n = document.createElement("p"); n.className = "note"; n.textContent = "以上是示例对话，不是你的记录。"; els.thread.append(n); }
+    if (c.example) { const n = document.createElement("p"); n.className = "note"; n.textContent = "— 以上是示例，不是你的记录 —"; els.thread.append(n); }
   }
   function render() { renderList(); renderThread(); toBottom(); }
   function toBottom() { requestAnimationFrame(() => { els.scroll.scrollTop = els.scroll.scrollHeight; }); }
 
   // ---------- actions ----------
   function newChat() {
-    const c = { id: uid(), title: "新对话", updated: Date.now(), messages: [] };
     chats = chats.filter(x => x.messages.length);
-    chats.push(c); currentId = c.id; save(); els.app.classList.remove("drawer"); render(); els.input.focus();
+    const c = blank(); chats.push(c); currentId = c.id; save(); els.app.classList.remove("drawer"); render(); els.input.focus();
   }
   function removeChat(id) {
     chats = chats.filter(c => c.id !== id);
-    if (!chats.length) chats.push({ id: uid(), title: "新对话", updated: Date.now(), messages: [] });
+    if (!chats.length) chats.push(blank());
     if (currentId === id) currentId = [...chats].sort((a, b) => b.updated - a.updated)[0].id;
     save(); render();
   }
@@ -313,11 +363,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
     const bot = { role: "assistant", content: "", t: Date.now(), pending: true };
     c.messages.push(bot); busy = true; syncInput(); renderThread(); toBottom();
     const botEl = els.thread.lastElementChild.querySelector(".body");
-    const turns = c.messages.filter(m => !m.pending && m.content && !m.error).slice(-20).map(m => ({ role: m.role, content: m.content }));
+    const turns = c.messages.filter(m => !m.pending && m.content.trim() && !m.error).slice(-20).map(m => ({ role: m.role, content: m.content }));
     while (turns.length && turns[0].role !== "user") turns.shift();
     if (!sample) {
-      await new Promise(r => setTimeout(r, 600));
-      bot.content = "（演示模式）这个页面需要在 claude.ai 里打开，才能连上 Claude 真正回答。你刚才说的是：\n\n> " + turns.at(-1).content.slice(0, 200);
+      await new Promise(r => setTimeout(r, 900));
+      bot.content = "（演示模式）这盏灯要在 claude.ai 里打开才会真正亮起来。你刚才说的是：\n\n> " + turns.at(-1).content.slice(0, 200);
     } else {
       ctl = new AbortController();
       try {
@@ -330,8 +380,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
       } catch (e) {
         bot.content = e.text || "";
         const map = { not_granted: "你没有允许这个页面使用 Claude，刷新页面可以重新选择。", rate_limited: "请求太频繁或额度用完了，稍后再试。",
-          session_expired: "登录已过期，请重新登录 claude.ai。", refused: "Claude 拒绝回答这条内容，换个问法试试。", cancelled: "" };
-        const msg = e.code in map ? map[e.code] : "连接出错了，点“重新生成”再试一次。";
+          session_expired: "登录已过期，请重新登录 claude.ai。", refused: "Claude 没有回答这条内容，换个问法试试。", cancelled: "" };
+        const msg = e.code in map ? map[e.code] : "连接断了，点“重新生成”再试一次。";
         if (msg) bot.error = msg;
         if (!bot.content && !msg) bot.content = "（已停止）";
         if (["not_granted", "sampling_disabled", "not_declared"].includes(e.code)) setLive(false);
@@ -346,7 +396,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     let c = current();
     if (!c || c.example) { newChat(); c = current(); }
     c.messages.push({ role: "user", content: text, t: Date.now() });
-    if (c.title === "新对话") c.title = text.replace(/\s+/g, " ").slice(0, 24);
+    if (c.title === "新的对话") c.title = text.replace(/\s+/g, " ").slice(0, 22);
     c.updated = Date.now(); save(); renderList(); ask(c);
   }
   function regenerate() {
@@ -356,13 +406,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
   }
 
   // ---------- input ----------
+  const ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const ICON_STOP = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2.5"/></svg>';
   function syncInput() {
     const el = els.input; el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 200) + "px";
     els.send.disabled = !busy && !el.value.trim();
     els.send.setAttribute("aria-label", busy ? "停止" : "发送");
-    els.send.innerHTML = busy
-      ? '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    els.send.innerHTML = busy ? ICON_STOP : ICON_SEND;
   }
   els.input.addEventListener("input", syncInput);
   els.input.addEventListener("keydown", (e) => {
@@ -377,24 +427,67 @@ button { font: inherit; color: inherit; cursor: pointer; }
   $("newBtn").onclick = newChat;
   $("menuBtn").onclick = () => els.app.classList.add("drawer");
   $("scrim").onclick = () => els.app.classList.remove("drawer");
-  $("themeBtn").onclick = () => {
-    const r = document.documentElement;
-    const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    r.dataset.theme = dark ? "light" : "dark";
-    try { localStorage.setItem("qingdeng.theme", r.dataset.theme); } catch {}
-  };
-  try { const t = localStorage.getItem("qingdeng.theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
 
   function setLive(on) {
     els.status.classList.toggle("live", on);
-    els.statusText.textContent = on ? "已连接 Claude" : "演示模式";
+    els.statusText.textContent = on ? "灯已点亮 · Claude" : "演示模式";
   }
 
+  // ---------- night sky: drifting lamplight ----------
+  const sky = $("sky"), ctx = sky.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let fx = true; try { fx = localStorage.getItem("qingdeng.fx") !== "off"; } catch {}
+  let W = 0, H = 0, dpr = 1, orbs = [], stars = [], raf = 0;
+  function seed() {
+    dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+    sky.width = W * dpr; sky.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.round(Math.min(26, W / 50));
+    orbs = Array.from({ length: n }, () => {
+      const warm = Math.random() < .72;
+      return { x: Math.random() * W, y: Math.random() * H, r: 18 + Math.random() * 70,
+        vx: (Math.random() - .5) * .12, vy: -.04 - Math.random() * .14,
+        a: .05 + Math.random() * .11, ph: Math.random() * 6.28, sp: .004 + Math.random() * .008,
+        c: warm ? [242, 184, 102] : [127, 198, 180] };
+    });
+    stars = Array.from({ length: Math.round(W * H / 9000) }, () => ({
+      x: Math.random() * W, y: Math.random() * H * .7, r: Math.random() * 1.1 + .2, ph: Math.random() * 6.28, sp: .01 + Math.random() * .02 }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.ph += s.sp; const a = .25 + .35 * Math.sin(s.ph);
+      ctx.fillStyle = `rgba(255,240,215,${Math.max(0, a)})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+    }
+    ctx.globalCompositeOperation = "lighter";
+    for (const o of orbs) {
+      o.x += o.vx; o.y += o.vy; o.ph += o.sp;
+      if (o.y < -o.r) { o.y = H + o.r; o.x = Math.random() * W; }
+      if (o.x < -o.r) o.x = W + o.r; else if (o.x > W + o.r) o.x = -o.r;
+      const a = o.a * (.65 + .35 * Math.sin(o.ph));
+      const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+      g.addColorStop(0, `rgba(${o.c},${a})`); g.addColorStop(.45, `rgba(${o.c},${a * .45})`); g.addColorStop(1, `rgba(${o.c},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, 6.283); ctx.fill();
+    }
+    ctx.globalCompositeOperation = "source-over";
+  }
+  function loop() { draw(); raf = requestAnimationFrame(loop); }
+  function startFx() {
+    cancelAnimationFrame(raf);
+    $("fxBtn").textContent = fx ? "光影 开" : "光影 关";
+    if (!fx) { ctx.clearRect(0, 0, W, H); return; }
+    if (reduce || document.hidden) draw(); else loop();
+  }
+  $("fxBtn").onclick = () => { fx = !fx; try { localStorage.setItem("qingdeng.fx", fx ? "on" : "off"); } catch {} startFx(); };
+  addEventListener("resize", () => { seed(); startFx(); });
+  document.addEventListener("visibilitychange", startFx);
+
+  seed(); startFx();
+  tickClock(); setInterval(tickClock, 30000);
   render(); syncInput();
   (async () => {
     try { sample = window.claude ? await window.claude.use("sample") : null; } catch { sample = null; }
     setLive(!!sample);
-    if (!sample) $("hint").textContent = "演示模式：在 claude.ai 中打开此页面即可真正对话。记录只存在你的浏览器里。";
+    if (!sample) $("hint").textContent = "演示模式 · 在 claude.ai 中打开即可真正对话 · 记录只留在你的浏览器里";
     renderThread();
   })();
 })();
