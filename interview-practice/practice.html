@@ -1,0 +1,448 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>钧奕达面试抽题</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&display=swap">
+<style>
+/* 布局：单列手机卡片。上方选题库，中间是“面试官说的话”，下方作答与要点核对 */
+:root{
+  --bg:#eef2f6; --surface:#ffffff; --ink:#17202c; --muted:#5a6577; --line:#d6dde6;
+  --accent:#1d6b74; --accent-ink:#ffffff; --accent-soft:#dcecee;
+  --hit:#237a45; --hit-soft:#e1f2e7; --miss:#b33a2b; --miss-soft:#f8e4e1; --warn:#8a5a00; --warn-soft:#fbf0d9;
+  --display:"Noto Serif SC","Songti SC","STSong",serif;
+  --body:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141b; --surface:#18202b; --ink:#e5eaf1; --muted:#9aa5b5; --line:#2b3644;
+  --accent:#58b4be; --accent-ink:#0b1a1d; --accent-soft:#1d3438;
+  --hit:#6cc98f; --hit-soft:#173324; --miss:#f08a7a; --miss-soft:#3a1d19; --warn:#e8b75a; --warn-soft:#352a14;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --surface:#18202b; --ink:#e5eaf1; --muted:#9aa5b5; --line:#2b3644;
+  --accent:#58b4be; --accent-ink:#0b1a1d; --accent-soft:#1d3438;
+  --hit:#6cc98f; --hit-soft:#173324; --miss:#f08a7a; --miss-soft:#3a1d19; --warn:#e8b75a; --warn-soft:#352a14;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:16px}
+header h1{font-family:var(--display);font-size:1.4rem;margin:0;text-wrap:balance}
+header p{margin:2px 0 0;color:var(--muted);font-size:.9rem}
+.decks{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip small{opacity:.75;margin-left:4px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;border-radius:10px;padding:10px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.big{padding:14px 22px;font-size:1.05rem}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.chip:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn svg{width:18px;height:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.who{font-size:.78rem;letter-spacing:.08em;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.timer{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.say{font-family:var(--display);font-size:1.35rem;line-height:1.5;margin:0;text-wrap:balance}
+.hint{align-self:flex-start;background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:4px 10px;font-size:.9rem}
+textarea{width:100%;min-height:120px;resize:vertical;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.note{font-size:.85rem;color:var(--muted);margin:0}
+.mic.on{background:var(--miss);border-color:var(--miss);color:#fff}
+.points{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.points li{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;font-size:.95rem}
+.points li.hit{background:var(--hit-soft);color:var(--hit)}
+.points li.miss{background:var(--miss-soft);color:var(--miss)}
+.points li b{flex:0 0 auto;font-family:var(--mono);font-size:.85rem;padding-top:2px}
+.score{font-weight:700;font-size:1.05rem}
+details.ref{border-top:1px dashed var(--line);padding-top:10px}
+details.ref summary{cursor:pointer;color:var(--accent);font-weight:600}
+details.ref p{margin:8px 0 0;white-space:pre-wrap}
+.ai{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:.95rem;white-space:pre-wrap}
+.stats{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;color:var(--muted)}
+.stats span{font-variant-numeric:tabular-nums}
+.empty{color:var(--muted)}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.rules{font-size:.85rem;color:var(--muted);border-left:3px solid var(--miss);padding-left:10px;margin:0}
+@media (prefers-reduced-motion:no-preference){.card.fresh{animation:pop .25s ease-out}@keyframes pop{from{transform:translateY(6px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>钧奕达面试抽题</h1>
+    <p>随机抽题，面试官用人声念出来。你用嘴说或打字回答，答完自动核对要点。</p>
+  </header>
+
+  <div class="decks" id="decks" role="group" aria-label="题库"></div>
+
+  <div class="row">
+    <button class="btn primary big" id="draw" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
+      抽一题
+    </button>
+    <button class="btn" id="replay" type="button" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>
+      再听一遍
+    </button>
+    <label class="note" for="rate">语速</label>
+    <select id="rate"><option value="0.85">慢</option><option value="1" selected>正常</option><option value="1.15">快</option></select>
+  </div>
+
+  <section class="card" id="qcard" aria-live="polite">
+    <div class="who"><span id="who">面试官</span><span class="timer" id="timer"></span></div>
+    <p class="say" id="say">点“抽一题”开始。面试官会把问题念出来，先别看小抄，用自己的话答。</p>
+    <span class="hint" id="hint" hidden></span>
+    <label class="note" for="answer">你的回答</label>
+    <textarea id="answer" placeholder="点右下“说话”直接用嘴答，或点这里用键盘/输入法的话筒说"></textarea>
+    <div class="row">
+      <button class="btn mic" id="mic" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        <span id="micLabel">说话</span>
+      </button>
+      <button class="btn primary" id="check" type="button" disabled>答完了，核对</button>
+    </div>
+    <p class="note" id="micNote" hidden></p>
+  </section>
+
+  <section class="card" id="result" hidden>
+    <div class="score" id="score"></div>
+    <ul class="points" id="points"></ul>
+    <details class="ref" id="refBox"><summary>看参考答案</summary><p id="ref"></p>
+      <div class="row" style="margin-top:8px"><button class="btn" id="readRef" type="button">听参考答案</button></div>
+    </details>
+    <div class="row" id="aiRow" hidden><button class="btn" id="aiBtn" type="button">让 Claude 按意思点评</button></div>
+    <div class="ai" id="ai" hidden></div>
+    <div class="row">
+      <button class="btn" id="bad" type="button">没记住，多考我</button>
+      <button class="btn" id="good" type="button">记住了</button>
+    </div>
+  </section>
+
+  <div class="stats" id="stats"></div>
+
+  <p class="rules">现场原则：只看、只问，不签、不交钱。被催就说：“我回去考虑一下，明天答复您。”</p>
+</div>
+
+<script>
+const DECKS = [
+  {id:"they", name:"他们问我"},
+  {id:"me", name:"我问他们"},
+  {id:"terms", name:"条件核对"},
+  {id:"safe", name:"被催/被要东西"},
+  {id:"trip", name:"行程"}
+];
+
+// points: 每个要点给一组同义词，回答里出现任意一个就算答到
+const CARDS = [
+  // ── 他们问我 ──
+  {id:"intro", deck:"they", who:"面试官", timed:true,
+   ask:["你好，先简单做个自我介绍吧。","请你介绍一下自己。","来，先说说你自己的情况。"],
+   points:[
+     {label:"名字、年龄", keys:["乔笑蝶","笑蝶","22","二十二"]},
+     {label:"做过质检 / AOI / 客服", keys:["质检","aoi","客服","检测"]},
+     {label:"做事细", keys:["细","仔细","认真","核对"]},
+     {label:"想在成都长期干", keys:["成都","长期","定下来","稳定","一直做"]}
+   ],
+   ref:"我叫乔笑蝶，22岁。高中毕业就出来工作了，做过质检、AOI测试和客服，主要是检查产品有没有问题、做核对，这种细致的活我做得比较顺手。最近还用AI自己做了几个手机小应用。我不太会说话，但做事很细，现在想在成都长期定下来，找一份能一直做的审核工作。"},
+  {id:"leave", deck:"they", who:"面试官", timed:true,
+   ask:["你上一份工作为什么离开？","看你深圳那两份做得都不长，是什么原因？","之前的工作怎么没继续做下去？"],
+   points:[
+     {label:"都是试用期里结束的，不是主动走", keys:["试用期","不是我主动","不是主动"]},
+     {label:"岗位跟说的不一样（调包装 / 站产线）", keys:["包装","产线","不一样","不符","调我","调岗","站着"]},
+     {label:"所以更确定想坐电脑前核对", keys:["电脑","核对","复判"]}
+   ],
+   ref:"深圳那两份都是试用期里结束的，不是我主动走。第一家要调我去做包装，我想继续做检测；第二家说是电脑复判，去了是站产线。所以我更确定想做电脑前核对的工作。"},
+  {id:"why", deck:"they", who:"面试官", timed:true,
+   ask:["你为什么想做审核？","之前做质检，为什么想转来做审核？","你觉得自己适合审核这份工作吗？"],
+   points:[
+     {label:"质检就是对照标准挑问题", keys:["质检"]},
+     {label:"审核也是对照规则核对资料", keys:["标准","规则","对照","核对"]},
+     {label:"习惯这种活、坐得住", keys:["坐得住","习惯","适合","顺手"]}
+   ],
+   ref:"我做质检时每天就是对照标准看图、挑问题，我习惯这种工作，也坐得住。审核也是对照规则核对资料，挺适合我。"},
+  {id:"phone", deck:"they", who:"面试官", timed:true,
+   ask:["我们这个岗位要打电话，你能接受吗？","每天大概要打三十个电话核实，你可以吗？","你怕不怕打电话？"],
+   points:[
+     {label:"核实资料、照话术问：可以", keys:["核实","话术","可以","没问题"]},
+     {label:"推销、很热情的聊：不擅长", keys:["推销","销售","不擅长","不太会"]}
+   ],
+   ref:"只是跟客户核实资料、照着话术问，我可以。推销、要很热情跟人聊的那种，我不太擅长。"},
+
+  // ── 我问他们 ──
+  {id:"q-abn", deck:"me", who:"面试官", hint:"这次问：公司正不正规",
+   ask:["好，你有什么想问我们的吗？","我这边差不多了，你有什么问题？"],
+   points:[
+     {label:"提到“经营异常”", keys:["经营异常","异常","名录"]},
+     {label:"问是不是地址变了没更新", keys:["地址","搬","变更","更新","变了"]}
+   ],
+   ref:"我查到公司在经营异常名录里，是地址变了还没更新吗？"},
+  {id:"q-contract", deck:"me", who:"面试官", hint:"这次问：合同跟谁签",
+   ask:["好，你有什么想问我们的吗？","你还有什么想了解的？"],
+   points:[
+     {label:"问合同", keys:["合同"]},
+     {label:"跟钧奕达签，还是别的公司（防外包、派遣）", keys:["钧奕达","别的公司","哪家","哪个公司","外包","派遣","其他公司"]}
+   ],
+   ref:"合同是跟钧奕达签，还是跟别的公司签？"},
+  {id:"q-ss", deck:"me", who:"面试官", hint:"这次问：社保",
+   ask:["你有什么想问的，尽管问。","你还有什么想了解的？"],
+   points:[
+     {label:"现在交不交社保", keys:["社保","五险"]},
+     {label:"转正后从哪个月开始交", keys:["转正","哪个月","什么时候","几月"]}
+   ],
+   ref:"现在交社保吗？转正后从哪个月开始交？"},
+  {id:"q-pay", deck:"me", who:"面试官", hint:"这次问：工资怎么发",
+   ask:["你有什么想问我们的吗？","关于待遇还有什么想问的？"],
+   points:[
+     {label:"是不是银行转账", keys:["银行","转账","打卡"]},
+     {label:"有没有工资条", keys:["工资条"]},
+     {label:"第一次几号发、发哪个月的", keys:["几号","第一次","哪个月","首次","第一个月"]}
+   ],
+   ref:"工资是银行转账吗？有工资条吗？第一次是几号发、发的是哪个月的？"},
+  {id:"q-call", deck:"me", who:"面试官", hint:"这次问：电话具体怎么打",
+   ask:["你有什么想问的吗？","工作内容这块还有什么疑问？"],
+   points:[
+     {label:"有没有话术", keys:["话术","稿子","模板"]},
+     {label:"一个电话几分钟", keys:["几分钟","多久","多长","时长"]}
+   ],
+   ref:"打电话有固定话术吗？一个电话大概几分钟？"},
+  {id:"q-all", deck:"me", who:"面试官", hint:"这次：把 5 个问题全问出来",
+   ask:["你还有什么想问的？都问了吧，我一起回答你。"],
+   points:[
+     {label:"① 经营异常 / 地址", keys:["经营异常","异常","地址"]},
+     {label:"② 合同跟谁签", keys:["合同"]},
+     {label:"③ 社保", keys:["社保","五险"]},
+     {label:"④ 工资怎么发 / 工资条", keys:["银行","转账","工资条","几号发"]},
+     {label:"⑤ 电话话术 / 几分钟", keys:["话术","几分钟","多久"]}
+   ],
+   ref:"1. 公司在经营异常名录里，是地址变了没更新吗？\n2. 合同跟钧奕达签，还是别的公司？\n3. 现在交社保吗？转正后从哪个月交？\n4. 工资银行转账吗？有工资条吗？第一次几号发、发哪个月？\n5. 电话有话术吗？一个几分钟？"},
+
+  // ── 条件核对 ──
+  {id:"t-hours", deck:"terms", who:"教练", ask:["对一下条件：上班时间和午休是怎么定的？"],
+   points:[{label:"早9晚6", keys:["9","九"]},{label:"午休1.5小时", keys:["1.5","一个半","一点五","1个半"]}],
+   ref:"早9晚6，午休1.5小时。"},
+  {id:"t-off", deck:"terms", who:"教练", ask:["一个月休几天？能不能调？"],
+   points:[{label:"月休6天", keys:["6","六"]},{label:"可以调休", keys:["调休","可调","能调"]}],
+   ref:"月休6天，可以调休。"},
+  {id:"t-trial", deck:"terms", who:"教练", ask:["试用期多久，工资多少？"],
+   points:[{label:"1到2个月", keys:["1到2","一到两","1-2","1–2","一两个月","1~2"]},{label:"无责3500", keys:["3500","三千五"]}],
+   ref:"试用期1–2个月，无责底薪3500。"},
+  {id:"t-full", deck:"terms", who:"教练", ask:["转正以后工资怎么算？"],
+   points:[{label:"底薪4500", keys:["4500","四千五"]},{label:"加1000奖金", keys:["1000","一千"]},{label:"加提成", keys:["提成"]}],
+   ref:"转正4500，加1000奖金，再加提成。"},
+  {id:"t-payday", deck:"terms", who:"教练", ask:["每个月几号发工资？"],
+   points:[{label:"每月20号", keys:["20","二十"]}],
+   ref:"每月20号发工资。"},
+  {id:"t-calls", deck:"terms", who:"教练", ask:["一天大概打多少电话？要不要卖东西？"],
+   points:[{label:"约30个核实电话", keys:["30","三十"]},{label:"不销售", keys:["不销售","不推销","不卖","不用卖"]}],
+   ref:"一天约30个核实电话，不做销售。"},
+
+  // ── 被催 / 被要东西 ──
+  {id:"s-fee", deck:"safe", who:"对方", ask:["入职要交五百块培训费和服装费，今天交了明天就能上班。"],
+   points:[{label:"不交钱", keys:["不交","不付","不给","不用了","不行","不方便"]},{label:"回去考虑，明天答复", keys:["考虑","明天答复","回去"]}],
+   ref:"不好意思，我今天不交钱。我回去考虑一下，明天答复您。"},
+  {id:"s-sign", deck:"safe", who:"对方", ask:["那今天就把合同签了吧，签了就定下来了。"],
+   points:[{label:"今天不签", keys:["不签","先不签","不能签"]},{label:"回去考虑，明天答复", keys:["考虑","明天答复","回去"]}],
+   ref:"我想先把合同带回去看看，今天先不签。我回去考虑一下，明天答复您。"},
+  {id:"s-id", deck:"safe", who:"对方", ask:["身份证给我一下，我拿去里面复印、拍个照登记。"],
+   points:[{label:"身份证不让拿走、不让拍", keys:["不","自己拿","我拿着","在这","当面"]}],
+   ref:"身份证我自己拿着就行，今天先不登记，等确定入职再办。"},
+  {id:"s-code", deck:"safe", who:"对方", ask:["扫一下这个码注册个账号，再把手机收到的验证码念给我。"],
+   points:[{label:"不扫码、不给验证码", keys:["不扫","不给","不念","不注册","验证码不"]}],
+   ref:"不好意思，扫码注册和验证码我不弄，等入职后再说。"},
+  {id:"s-card", deck:"safe", who:"对方", ask:["把你的银行卡号和卡给我，我们先帮你办工资卡。"],
+   points:[{label:"不给银行卡", keys:["不给","不","入职后","以后再"]}],
+   ref:"银行卡等正式入职、签了合同再提供。"},
+  {id:"s-rush", deck:"safe", who:"对方", ask:["名额就剩一个了，你今天必须定下来，不然就给别人了。"],
+   points:[{label:"不当场答应", keys:["考虑","明天","回去"]},{label:"说出那句话：明天答复您", keys:["明天答复","答复您","明天给您"]}],
+   ref:"我回去考虑一下，明天答复您。"},
+  {id:"s-look", deck:"safe", who:"教练", ask:["进门以后，你要用眼睛看哪两样东西？"],
+   points:[{label:"门口有没有“钧奕达”牌子", keys:["牌子","钧奕达","招牌","门牌"]},{label:"是不是真有一排人在干活", keys:["人","干活","上班","工位"]}],
+   ref:"一看门口有没有“钧奕达”的牌子；二看是不是真有一排人在干活。"},
+
+  // ── 行程 ──
+  {id:"r-time", deck:"trip", who:"教练", ask:["今天几点吃饭、几点出门、几点面试？"],
+   points:[{label:"13:30吃饭", keys:["13:30","1:30","一点半","13点半","十三点半"]},{label:"14:15出门", keys:["14:15","2:15","两点十五","2点15","两点一刻","14点15"]},{label:"15:15面试", keys:["15:15","3:15","三点十五","3点15","三点一刻","15点15"]}],
+   ref:"13:30吃饭，14:15出门，15:15面试。"},
+  {id:"r-place", deck:"trip", who:"教练", ask:["面试地址在哪？"],
+   points:[{label:"锦江区", keys:["锦江"]},{label:"SAC东原中心", keys:["sac","东原"]},{label:"1306", keys:["1306","一三零六","十三楼"]}],
+   ref:"锦江区SAC东原中心1306，地铁约25分钟。"},
+  {id:"r-bring", deck:"trip", who:"教练", ask:["出门要带什么？"],
+   points:[{label:"身份证", keys:["身份证"]},{label:"手机（简历PDF在里面）", keys:["手机","简历"]}],
+   ref:"身份证、手机（简历PDF在手机里）。"},
+  {id:"r-tell", deck:"trip", who:"教练", ask:["到楼下和面试出来，要分别做什么？"],
+   points:[{label:"到楼下给Claude说“到了”", keys:["到了"]},{label:"出来说“出来了”", keys:["出来了"]}],
+   ref:"到楼下给Claude说“到了”，出来说“出来了”。"}
+];
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let active = new Set(store.get("decks", ["they","me"]));
+let stats = store.get("stats", {});   // id -> {good, bad}
+let current = null, lastId = null, spokenText = "", timerId = null, t0 = 0;
+
+function renderDecks(){
+  $("decks").innerHTML = "";
+  DECKS.forEach(d => {
+    const n = CARDS.filter(c => c.deck === d.id).length;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip";
+    b.setAttribute("aria-pressed", active.has(d.id));
+    b.innerHTML = d.name + "<small>" + n + "</small>";
+    b.onclick = () => {
+      active.has(d.id) ? active.delete(d.id) : active.add(d.id);
+      if (!active.size) active.add(d.id);
+      store.set("decks", [...active]); renderDecks();
+    };
+    $("decks").appendChild(b);
+  });
+}
+
+function renderStats(){
+  let g = 0, b = 0, weak = [];
+  for (const c of CARDS){ const s = stats[c.id]; if (!s) continue; g += s.good; b += s.bad; if (s.bad > s.good) weak.push(c); }
+  $("stats").innerHTML = g + b
+    ? `<span>记住 ${g} 次</span><span>没记住 ${b} 次</span><span>薄弱题 ${weak.length} 道（会多抽）</span>`
+    : `<span class="empty">还没练过。没记住的题会被多抽几次。</span>`;
+}
+
+// 没记住的题权重高，刚抽过的不连抽
+function pick(){
+  const pool = CARDS.filter(c => active.has(c.deck) && c.id !== lastId);
+  const list = pool.length ? pool : CARDS.filter(c => active.has(c.deck));
+  const w = list.map(c => { const s = stats[c.id] || {good:0,bad:0}; return Math.max(0.4, 1 + s.bad * 2 - s.good * 0.5); });
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < list.length; i++){ r -= w[i]; if (r <= 0) return list[i]; }
+  return list[list.length - 1];
+}
+
+// ── 人声 ──
+function zhVoice(){
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => /zh[-_]CN/i.test(v.lang) && /female|xiaoxiao|ting|tingting|女/i.test(v.name))
+      || vs.find(v => /zh[-_]CN/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null;
+}
+function speak(text){
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "zh-CN"; u.rate = parseFloat($("rate").value);
+  const v = zhVoice(); if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => {};
+
+function startTimer(){
+  clearInterval(timerId); t0 = Date.now();
+  const tick = () => { const s = Math.floor((Date.now() - t0) / 1000); $("timer").textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; };
+  tick(); timerId = setInterval(tick, 1000);
+}
+
+function draw(){
+  stopMic();
+  current = pick(); lastId = current.id;
+  spokenText = current.ask[Math.floor(Math.random() * current.ask.length)];
+  $("who").textContent = current.who + " · " + DECKS.find(d => d.id === current.deck).name;
+  $("say").textContent = "“" + spokenText + "”";
+  $("hint").hidden = !current.hint; $("hint").textContent = current.hint || "";
+  $("answer").value = ""; $("result").hidden = true; $("ai").hidden = true; $("refBox").open = false;
+  $("check").disabled = false; $("replay").disabled = false;
+  const q = $("qcard"); q.classList.remove("fresh"); void q.offsetWidth; q.classList.add("fresh");
+  if (current.timed) startTimer(); else { clearInterval(timerId); $("timer").textContent = ""; }
+  speak(spokenText);
+}
+
+// 去掉空格和标点，冒号统一成英文（“14：15”和“14:15”都能对上）
+const norm = s => s.toLowerCase().replace(/：/g, ":").replace(/[\s，。、！？,.!?“”"'；;（）()]/g, "");
+
+function check(){
+  if (!current) return;
+  stopMic(); clearInterval(timerId);
+  const raw = $("answer").value, a = norm(raw);
+  const res = current.points.map(p => ({...p, hit: p.keys.some(k => a.includes(norm(k)))}));
+  const hit = res.filter(r => r.hit).length;
+  $("points").innerHTML = res.map(r =>
+    `<li class="${r.hit ? "hit" : "miss"}"><b>${r.hit ? "答到" : "漏了"}</b><span>${r.label}</span></li>`).join("");
+  const all = hit === res.length;
+  $("score").textContent = !raw.trim() ? "还没回答。可以先看参考答案，再抽一次。"
+    : all ? `要点全答到了（${hit}/${res.length}）` : `答到 ${hit}/${res.length} 个要点`;
+  $("ref").textContent = current.ref;
+  $("result").hidden = false; $("ai").hidden = true;
+  if (!all) $("refBox").open = true;
+  $("result").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"nearest"});
+}
+
+function mark(ok){
+  if (!current) return;
+  const s = stats[current.id] || {good:0, bad:0};
+  ok ? s.good++ : s.bad++;
+  stats[current.id] = s; store.set("stats", stats); renderStats();
+  draw();
+}
+
+// ── 话筒 ──
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false, baseText = "";
+function micHelp(msg){ $("micNote").hidden = false; $("micNote").textContent = msg; }
+const FALLBACK = "这里不能直接开话筒。点上面的输入框，用手机键盘（输入法）上的话筒按钮说话，效果一样。";
+function stopMic(){ if (rec && listening) rec.stop(); }
+$("mic").onclick = () => {
+  if (!SR){ micHelp(FALLBACK); $("answer").focus(); return; }
+  if (listening){ rec.stop(); return; }
+  rec = new SR(); rec.lang = "zh-CN"; rec.continuous = true; rec.interimResults = true;
+  baseText = $("answer").value;
+  rec.onresult = e => {
+    let fin = "", tmp = "";
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      (e.results[i].isFinal ? (fin += e.results[i][0].transcript) : (tmp += e.results[i][0].transcript));
+    }
+    if (fin) baseText += fin;
+    $("answer").value = baseText + tmp;
+  };
+  rec.onerror = e => { if (["not-allowed","service-not-allowed","audio-capture","network"].includes(e.error)) micHelp(FALLBACK); };
+  rec.onend = () => { listening = false; $("mic").classList.remove("on"); $("micLabel").textContent = "说话"; };
+  try{
+    speechSynthesis && speechSynthesis.cancel();
+    rec.start(); listening = true; $("mic").classList.add("on"); $("micLabel").textContent = "停止";
+  }catch(err){ micHelp(FALLBACK); }
+};
+
+// ── Claude 点评（可用时才显示）──
+let sample = null;
+(async () => {
+  try{ sample = window.claude && await window.claude.use("sample"); }catch(e){ sample = null; }
+  if (sample) $("aiRow").hidden = false;
+})();
+$("aiBtn").onclick = async () => {
+  if (!sample || !current) return;
+  const box = $("ai"); box.hidden = false; box.textContent = "Claude 正在看……";
+  $("aiBtn").disabled = true;
+  const prompt = `你是面试教练，帮一位22岁、不太会说话的求职者练习面试。她用口语回答，可能是语音转文字，有错字很正常。
+只看“意思”有没有答到要点，不要求原话。
+问题：${spokenText}
+${current.hint ? "提示：" + current.hint + "\n" : ""}要点：
+${current.points.map((p, i) => (i + 1) + ". " + p.label).join("\n")}
+参考答案：${current.ref}
+她的回答：${$("answer").value || "（没回答）"}
+
+用中文回复，最多4行：第一行“答到X/${current.points.length}个要点”；然后指出漏掉的要点；最后给一句她可以直接照着说的、更顺口的说法（不超过40字）。不要客套。`;
+  try{
+    await sample(prompt, {modelTier:"quick", cache:false, onText: ({text}) => { box.textContent = text; }});
+  }catch(e){
+    box.textContent = e && e.code === "not_granted" ? "没有开启 Claude 点评权限，上面的自动核对照样能用。"
+      : e && e.code === "rate_limited" ? "点评用得太频繁了，过一会儿再试。" : "这次没拿到点评，上面的自动核对照样能用。";
+    if (e && e.code === "not_granted") $("aiRow").hidden = true;
+  }finally{ $("aiBtn").disabled = false; }
+};
+
+$("draw").onclick = draw;
+$("replay").onclick = () => spokenText && speak(spokenText);
+$("check").onclick = check;
+$("readRef").onclick = () => current && speak(current.ref);
+$("good").onclick = () => mark(true);
+$("bad").onclick = () => mark(false);
+$("answer").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) check(); });
+
+renderDecks(); renderStats();
+if (!SR) micHelp("提示：点输入框，用手机键盘（输入法）上的话筒说话，就能用嘴回答。");
+</script>
